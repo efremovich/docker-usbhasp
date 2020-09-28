@@ -13,7 +13,7 @@ RUN dpkg --add-architecture i386; \
     apt-get update; \
     # ---- Install packages ------------------------------------------------------------
     apt-cache search linux-headers; \
-    apt-get install -y --no-install-recommends linux-headers-4.15.0-115 build-essential automake autoconf libtool libusb-0.1-4:i386 libjansson-dev kmod git; \
+    apt-get install -y --no-install-recommends linux-headers-$(uname -r) build-essential automake autoconf libtool libusb-0.1-4:i386 libjansson-dev kmod git; \
     cd /tmp; \
     # ---- Clone vhci_hcd, libusb_vhci, UsbHasp from repositories ----------------------
     git clone git://git.code.sf.net/p/usb-vhci/vhci_hcd; \
@@ -25,9 +25,9 @@ RUN dpkg --add-architecture i386; \
     patch usb-vhci-hcd.c /tmp/usb-vhci-hcd.patch; \
     patch usb-vhci-iocifc.c /tmp/usb-vhci-iocifc.patch; \
     make > /dev/null 2>&1; \
-    mkdir -p /lib/modules/4.15.0-115; \
-    cp usb-vhci-hcd.ko /lib/modules/4.15.0-115; \
-    cp usb-vhci-iocifc.ko /lib/modules/4.15.0-115; \
+    mkdir -p /lib/modules/$(uname -r); \
+    cp usb-vhci-hcd.ko /lib/modules/$(uname -r); \
+    cp usb-vhci-iocifc.ko /lib/modules/$(uname -r); \
     # ---- Compile and install libusb_vhci ---------------------------------------------
     cd /tmp/libusb_vhci; \
     autoreconf --install --force > /dev/null 2>&1; \
@@ -42,12 +42,12 @@ RUN dpkg --add-architecture i386; \
     touch /etc/modules; \
     echo 'usb-vhci-hcd' >> /etc/modules; \
     echo 'usb-vhci-iocifc' >> /etc/modules; \
-    touch /lib/modules/4.15.0-115/modules.dep; \
-    echo 'usb-vhci-hcd.ko' >> /lib/modules/4.15.0-115/modules.dep; \
-    echo 'usb-vhci-iocifc.ko' >> /lib/modules/4.15.0-115/modules.dep; \
+    touch /lib/modules/$(uname -r)/modules.dep; \
+    echo 'usb-vhci-hcd.ko' >> /lib/modules/$(uname -r)/modules.dep; \
+    echo 'usb-vhci-iocifc.ko' >> /lib/modules/$(uname -r)/modules.dep; \
     depmod -a
     # ---- Clear docker image ----------------------------------------------------------
-    # apt-get remove --purge -y linux-headers-4.15.0-115 build-essential automake autoconf libtool git; \
+    # apt-get remove --purge -y linux-headers-$(uname -r) build-essential automake autoconf libtool git; \
     # apt-get clean autoclean; \
     # apt-get autoremove -y; \ 
     # rm -rf /usr/include/linux; \
